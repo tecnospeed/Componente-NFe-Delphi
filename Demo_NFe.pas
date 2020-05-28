@@ -14,43 +14,52 @@ type
     pgcNFe: TPageControl;
     tbsNfe: TTabSheet;
     GroupBox1: TGroupBox;
-    cbCertificado: TComboBox;
     edtUF: TLabeledEdit;
     edtCNPJ: TLabeledEdit;
     edtID: TLabeledEdit;
     edtNumRec: TLabeledEdit;
     edtNumProt: TLabeledEdit;
+    dlgOpen: TOpenDialog;
+    mmXml: TMemo;
+    spdNFe: TspdNFe;
+    spdNFeDataSets: TspdNFeDataSets;
+    edCnpjSh: TEdit;
+    edTokenSh: TEdit;
+    Label1: TLabel;
+    Label3: TLabel;
+    TabImpressao: TTabSheet;
+    TabDemaisMetodos: TTabSheet;
+    GroupBox3: TGroupBox;
+    cbCertificado: TComboBox;
+    Label4: TLabel;
     btnConfig: TButton;
+    btnLoadConfig: TButton;
+    btnGerarREC: TButton;
+    btnGerarDS: TButton;
+    btnGeraXMLTX2: TButton;
+    btnStatus: TButton;
+    btnAssinar: TButton;
     btnEnviarNfe: TButton;
+    btnEnviarSinc: TButton;
+    btnConsultRec: TButton;
+    btnConsultNfe: TButton;
     gbImpressao: TGroupBox;
     btnPrever: TButton;
     btnEditarDanfe: TButton;
-    btnStatus: TButton;
-    btnEnviarSinc: TButton;
-    btnGerarDS: TButton;
-    btnConsultRec: TButton;
-    btnAssinar: TButton;
-    btnConsultNfe: TButton;
-    btnInutilizarNfe: TButton;
     btnImprimir: TButton;
     btnExportPdf: TButton;
     btnVisualizar: TButton;
     btnEnviarEmail: TButton;
-    btnConsultaCadastro: TButton;
-    btnLoadConfig: TButton;
-    dlgOpen: TOpenDialog;
-    mmXml: TMemo;
-    btnEventos: TButton;
+    btEmailArquivo: TButton;
+    GroupBox4: TGroupBox;
+    btnInutilizarNfe: TButton;
     btnConvertXmlDataset: TButton;
+    btnConsultaCadastro: TButton;
+    btnEventos: TButton;
     btnAuditar: TButton;
-    btnGerarREC: TButton;
-    btnGeraXMLTX2: TButton;
-    spdNFe: TspdNFe;
-    spdNFeDataSets: TspdNFeDataSets;
     GroupBox2: TGroupBox;
     mmAudicao: TMemo;
-    btEmailArquivo: TButton;
-    Button1: TButton;
+    Button2: TButton;
     procedure cbCertificadoChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnConfigClick(Sender: TObject);
@@ -78,7 +87,7 @@ type
     procedure btnGerarRECClick(Sender: TObject);
     procedure btnGeraXMLTX2Click(Sender: TObject);
     procedure btEmailArquivoClick(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
 
     private
     { Private declarations }
@@ -114,8 +123,6 @@ begin
   vIni := TIniFile.Create(ExtractFilePath(ParamStr(0))+ 'nfeconfig.ini');
 
   spdNFe.AtualizarArquivoServidores := False;
-  spdNFe.ConfigurarSoftwareHouse(vIni.ReadString('NFE', 'CNPJ',''));
-  spdNFe.LoadConfig();
   spdNFe.ListarCertificados(cbCertificado.Items);
 end;
 //-----------------------------------------------------------------------------
@@ -430,6 +437,10 @@ begin//
   edtUF.Text          := spdNFe.UF;
   cbCertificado.Text  := spdNFe.NomeCertificado.Text;
   edtCNPJ.Text        := spdNFe.CNPJ;
+  edCnpjSh.Text       := vIni.ReadString('NFE', 'cnpjSh','');
+  edTokenSh.Text       := vIni.ReadString('NFE', 'tokenSh','');
+  spdNFe.ConfigurarSoftwareHouse(edCnpjSh.Text,edTokenSh.Text);//xxx
+
 
   spdNFe.MaxSizeLoteEnvio := 500;
 
@@ -586,20 +597,45 @@ procedure TDemo_NFe_Form.btEmailArquivoClick(Sender: TObject);
 var
   PDFaux, XMLaux: string;
 begin
-  PDFaux := InputBox('Pergunta', 'Arquivo PDF', 'D:\Temp\Danfe.pdf');
-  XMLaux := InputBox('Pergunta', 'Arquivo XML', 'D:\Temp\NF.XML');
+  PDFaux := '';
+  XMLaux := '';
 
-  spdNFe.EnviarNotaDestinatarioAnexos(PDFaux, XMLaux, '');
+  dlgOpen.InitialDir := ExtractFilePath(ParamStr(0));
+  dlgOpen.Title      := 'Selecione o PDF para envio.';
+  dlgOpen.Execute;
+
+  if dlgOpen.FileName <> '' then
+    PDFaux := dlgOpen.FileName
+  else
+    Exit;
+
+  dlgOpen.InitialDir := ExtractFilePath(ParamStr(0));
+  dlgOpen.Title      := 'Selecione o XML para envio.';
+  dlgOpen.Execute;
+
+  if dlgOpen.FileName <> '' then
+    XMLaux := dlgOpen.FileName
+  else
+    Exit;
+
+  if (PDFaux <> '') and (XMLaux <> '') then
+    spdNFe.EnviarNotaDestinatarioAnexos(PDFaux, XMLaux, '');
 end;
 
-procedure TDemo_NFe_Form.Button1Click(Sender: TObject);
+procedure TDemo_NFe_Form.Button2Click(Sender: TObject);
 var
-  PDFaux, XMLaux: string;
+  XMLAux: string;
 begin
-  PDFaux := InputBox('Pergunta', 'Arquivo PDF', 'D:\Temp\Danfe.pdf');
-  XMLaux := InputBox('Pergunta', 'Arquivo XML', 'D:\Temp\NF.XML');
+  dlgOpen.InitialDir := ExtractFilePath(ParamStr(0));
+  dlgOpen.Execute;
 
-//  spdNFeTLB.EnviarNotaDestinatarioAnexos(PDFaux, XMLaux, '');
+  if dlgOpen.FileName <> '' then
+  begin
+    XMLAux := dlgOpen.FileName;
+    spdNFe.EnviarCCeDestinatario(XMLAux);
+  end
+
+
 end;
 
 end.
