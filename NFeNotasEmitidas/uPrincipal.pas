@@ -271,10 +271,22 @@ begin
   if spdNFe.NomeCertificado.Text = '' then
     spdNFe.NomeCertificado.Text := cbCertificado.Text;
 
-  lblUF.Caption          := spdNFe.UF;
-  lblCNPJ.Caption        := spdNFe.CNPJ;
-  lblCNPJSH.Caption      := vCNPJSH;
-  lblCertificado.Caption := spdNFe.NomeCertificado.Text;
+  vUltNSU  := '000000000000000';
+  vMaxNSU  := '000000000000000';
+
+  spdNFE.ListarCertificados(cbCertificado.Items);
+  cbCertificado.ItemIndex := 0;
+
+  lblChaveNFe.Caption     := '';
+  lblConsultaUF.Caption   := '';
+  lblConsultaCNPJ.Caption := '';
+  lblConsultaNSU.Caption  := '';
+  lblUltNSU.Caption       := vUltNSU;
+  lblMaxNSU.Caption       := vMaxNSU;
+  lblUF.Caption           := spdNFe.UF;
+  lblCNPJ.Caption         := spdNFe.CNPJ;
+  lblCNPJSH.Caption       := vCNPJSH;
+  lblCertificado.Caption  := spdNFe.NomeCertificado.Text;
 end;
 
 procedure TfrmPrincipal.CarregarUltNSU(nomeDoArquivo: String);
@@ -448,10 +460,7 @@ begin
     Exit;
   end;  
 
-  mmXml.Text := spdNFe.GerarXMLManifestoDestinatario(lblChaveNFe.caption,
-                                                     vDirLogManifest + lblChaveNFe.caption + '-mfEnv.xml',
-                                                     vDirLogManifest + lblChaveNFe.caption + '-mfRet.xml',
-                                                     vDirManifestada + lblChaveNFe.caption + '-mf.xml');
+  mmXml.Text := spdNFe.EnviarManifestacaoDestinatario(2, lblChaveNFe.caption, spdNFE.CNPJ, '', FormatDateTime('yyyy-MM-dd''T''HH:mm:ss', Now), 1, '-03:00','91');
   slvXMLs.Refresh;
 end;
 
